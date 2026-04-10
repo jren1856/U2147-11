@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台灣麥當勞 Web 點餐系統</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>🍟 台灣麥當勞 Web 點餐系統</h1>
+    <p>自由搭配套餐 / 加點 / 備註，並送出至 Google 表單（可直接部署於 GitHub Pages）</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>0) 訂餐時間</h2>
+      <div class="grid three-cols">
+        <label>
+          訂餐日期與時間
+          <input id="orderDateTimeInput" type="datetime-local">
+        </label>
+        <label>
+          取餐方式
+          <select id="orderTypeSelect">
+            <option value="pickup">自取（自取金額）</option>
+            <option value="normal">一般</option>
+          </select>
+        </label>
+        <label>
+          時段判斷
+          <input id="timeSlotHint" type="text" readonly>
+        </label>
+      </div>
+      <p class="hint">系統會依照時間自動切換可選餐點（早餐/全日菜單）。</p>
+    </section>
+
+    <section class="panel">
+      <h2>1) 選擇餐點</h2>
+      <div class="grid two-cols">
+        <label>
+          分類
+          <select id="categorySelect"></select>
+        </label>
+        <label>
+          主餐
+          <select id="itemSelect"></select>
+        </label>
+      </div>
+
+      <div class="grid three-cols">
+        <label>
+          數量
+          <input id="qtyInput" type="number" min="1" value="1">
+        </label>
+        <label>
+          套餐搭配
+          <select id="setSelect"></select>
+        </label>
+        <label>
+          套餐飲料替換
+          <select id="drinkSelect"></select>
+        </label>
+        <label>
+          飲料甜度
+          <select id="drinkSugarSelect">
+            <option value="正常">正常</option>
+            <option value="少糖">少糖</option>
+            <option value="半糖">半糖</option>
+            <option value="微糖">微糖</option>
+            <option value="無糖">無糖</option>
+          </select>
+        </label>
+      </div>
+
+      <fieldset>
+        <legend>加點</legend>
+        <div id="addonList" class="addon-list"></div>
+      </fieldset>
+
+      <label>
+        這份餐點備註
+        <input id="itemNoteInput" type="text" placeholder="例如：去冰、不要醬、薯條不要鹽">
+      </label>
+
+      <button id="addToCartBtn" type="button">加入訂單</button>
+    </section>
+
+    <section class="panel">
+      <h2>2) 訂單明細</h2>
+      <ul id="cartList" class="cart-list"></ul>
+      <p class="total">訂單總金額：<strong id="totalPrice">$0</strong></p>
+      <button id="clearCartBtn" type="button" class="danger">清空訂單</button>
+    </section>
+
+    <section class="panel">
+      <h2>3) 填寫訂購人資訊</h2>
+      <div class="grid two-cols">
+        <label>
+          訂購人姓名
+          <input id="customerNameInput" type="text" placeholder="王小明">
+        </label>
+        <label>
+          聯絡電話
+          <input id="customerPhoneInput" type="text" placeholder="09xx-xxx-xxx">
+        </label>
+      </div>
+      <label>
+        整筆訂單備註
+        <input id="orderNoteInput" type="text" placeholder="例如：12:30 前送達 / 放櫃台">
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>4) Google 表單整合設定</h2>
+      <p class="hint">請先建立 Google 表單，並填入 formResponse 網址與對應 entry 欄位 ID。</p>
+
+      <div class="grid two-cols">
+        <label>
+          Google 表單 formResponse URL
+          <input id="formActionInput" type="url" placeholder="https://docs.google.com/forms/d/e/xxx/formResponse">
+        </label>
+        <label>
+          entry - 訂購人姓名
+          <input id="entryNameInput" type="text" placeholder="entry.123456789">
+        </label>
+        <label>
+          entry - 聯絡電話
+          <input id="entryPhoneInput" type="text" placeholder="entry.987654321">
+        </label>
+        <label>
+          entry - 訂單內容（文字）
+          <input id="entryOrderInput" type="text" placeholder="entry.1122334455">
+        </label>
+        <label>
+          entry - 訂單總金額
+          <input id="entryTotalInput" type="text" placeholder="entry.5566778899">
+        </label>
+        <label>
+          entry - 備註
+          <input id="entryMemoInput" type="text" placeholder="entry.9988776655">
+        </label>
+        <label>
+          Apps Script Web App URL（寫入 Google 試算表）
+          <input id="appsScriptUrlInput" type="url" placeholder="https://script.google.com/macros/s/xxx/exec">
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="saveConfigBtn" type="button">儲存設定到瀏覽器</button>
+        <button id="submitToGoogleBtn" type="button" class="primary">送出訂單到 Google 表單</button>
+        <button id="submitToSheetBtn" type="button" class="primary">送出到 Google 試算表</button>
+      </div>
+
+      <label>
+        訂單預覽
+        <textarea id="orderPreview" rows="8" readonly></textarea>
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>5) 可編輯菜單後台（本機）</h2>
+      <p class="hint">可直接編輯 JSON 更新餐點、價格、套餐與加點；更新後請按「套用」。</p>
+      <div class="grid two-cols">
+        <label>
+          今日確認狀態
+          <input id="dailyStatusInput" type="text" readonly>
+        </label>
+        <button id="confirmTodayBtn" type="button" class="primary">今日已確認菜單與價格</button>
+      </div>
+      <label>
+        菜單 JSON（含餐點/價格/供應時段）
+        <textarea id="menuEditor" rows="14"></textarea>
+      </label>
+      <div class="actions">
+        <button id="applyMenuBtn" type="button" class="primary">套用菜單設定</button>
+        <button id="resetMenuBtn" type="button" class="danger">還原預設菜單</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
